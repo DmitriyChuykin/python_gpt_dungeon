@@ -1,0 +1,36 @@
+{
+  "memory": [
+
+  ],
+  "notes": "",
+  "world": "The end of time. A world in which there is not a single living soul. The consequences of some terrible event",
+  "location": "Zaun, a city with strong sandstorms and dilapidated buildings",
+  "name": "Jester",
+  "description": "Seeker. A tall mysterious being who could see and change the past if he found fragments of the past. If he dies while in the past, then his soul returns back to the end of time, but the fragment is destroyed. If he dies at the end of time, then the game ends.",
+  "inventory": [
+    ""
+  ],
+  "skills": [],
+  "stats": {
+    "level": 1,
+    "xp": 0,
+    "max_xp": 10,
+    "hp": 10,
+    "max_hp": 10
+  },
+  "quests": [
+    "Understand, what is going on"
+  ],
+  "items nearby": [],
+  "characters": {
+    "allies": [
+      "None"
+    ],
+    "neutral": [
+      "None"
+    ],
+    "enemies": [
+      "None"
+    ]
+  }
+}
