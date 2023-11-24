@@ -41,18 +41,24 @@ def hp():
 def GUI():
     sg.theme('DarkAmber')
     stats = load()["stats"]
-    layout = [  [sg.Text('Информация')],
+    Info = [[sg.Text('Информация', font='_ 18', justification='c', expand_x=True)],
                 [sg.Text(f'Имя: {name}')],
                 [sg.Text('LVL: '+ str(stats["level"]) + ', XP: ' + str(stats["xp"]) + '/' + str(stats["max_xp"]) + ', HP: ' + str(stats["hp"]) + '/' + str(stats["max_hp"]),key='-STATS-')],
                 [sg.Text('Квесты:')],
-                [sg.Multiline('\n'.join(translate_array(load()["quests"])), s=(50,3), autoscroll=True, write_only=True, key='-QUESTS-')],
+                [sg.Multiline('\n'.join(translate_array(load()["quests"])), s=(60,3), autoscroll=True, write_only=True, key='-QUESTS-')],
                 [sg.Text('Инвентарь:')],
-                [sg.Multiline('\n'.join(translate_array(load()["inventory"])), s=(50,3), autoscroll=True, write_only=True, key='-INVENTORY-')],
+                [sg.Multiline('\n'.join(translate_array(load()["inventory"])), s=(60,3), autoscroll=True, write_only=True, key='-INVENTORY-')],
                 [sg.Text('Скиллы:')],
-                [sg.Multiline('\n'.join(translate_array(load()["skills"])), s=(50,3), autoscroll=True, write_only=True, key='-SKILLS-')],
-                [sg.Text('История')],
-                [sg.Multiline('\n'.join(history),s=(100,20), autoscroll=True, write_only=True, key='-OUT-')],
-                [sg.Text('Введите действие:'), sg.InputText(key='-IN-')],
+                [sg.Multiline('\n'.join(translate_array(load()["skills"])), s=(60,3), autoscroll=True, write_only=True, key='-SKILLS-')],
+                [sg.Text('История')],]
+    Action = [  [sg.Text('Действия', font='_ 18', justification='c', expand_x=True)],
+                [sg.Text('Переменные:')],
+                [sg.Listbox(values = ["notes", "location", "world", "place", "stats", "inventory", "skills", "quests", "items nearby", "characters"], s=(53,5), key='-PARAMS-', enable_events=True)],
+                [sg.InputText(key='-PARAMS_IN-', s=(55,3))],
+                [sg.Button("Сохранить переменную")]]
+    layout = [  [sg.Col(Info), sg.Col(Action)],
+                [sg.Multiline('\n'.join(history),s=(120,20), autoscroll=True, write_only=True, key='-OUT-')],
+                [sg.Text('Введите действие:'), sg.InputText(key='-IN-', s=(104,3))],
                 [sg.Button('Выполнить действие')] ]
     return layout
 
@@ -67,6 +73,7 @@ async def refresh(window):
     window['-QUESTS-'].update(quests)
     window['-INVENTORY-'].update(inventory)
     window['-SKILLS-'].update(skills)
+    window['-IN-'].update("")
 
 async def gpt(prompt:str)->str:
     provider = g4f.Provider.GPTalk
@@ -125,13 +132,21 @@ async def make_memory(msg):
 
 async def main():
     window = sg.Window('Нейро-шутовская днд', GUI())
+    last_event = ""
     while True:
         event, values = window.read()
         await refresh(window)
-        player_input = ts.translate_text(values["-IN-"], to_language='en')
-        prompt = await make_prompt(player_input)
-        msg = await gpt(prompt)
-        await make_memory(name + " (Player): " + player_input + ". \n" + msg)
+        if event == "-PARAMS-":
+            last_event = values[event][0]
+            window['-PARAMS_IN-'].update(load()[values[event][0]])
+        if event == "Сохранить переменную":
+            save(values["-PARAMS_IN-"], last_event)
+        if event == "Выполнить действие":
+            await refresh(window)
+            player_input = ts.translate_text(values["-IN-"], to_language='en')
+            prompt = await make_prompt(player_input)
+            msg = await gpt(prompt)
+            await make_memory(name + " (Player): " + player_input + ". \n" + msg)
         if event == sg.WIN_CLOSED:  # if user closes window or clicks cancel
             break
         """
